@@ -277,6 +277,16 @@ class TelegramBot:
         """Transport-agnostic notification interface."""
         return self._notification_service
 
+    @property
+    def seen_reaction(self) -> bool:
+        """Whether to send a seen reaction on incoming messages."""
+        return self._config.scene.seen_reaction
+
+    @property
+    def technical_footer(self) -> bool:
+        """Whether to append model/token/cost footer to responses."""
+        return self._config.scene.technical_footer
+
     def register_startup_hook(self, hook: Callable[[], Awaitable[None]]) -> None:
         """Register a callback to run after bot startup (used by supervisor)."""
         self._dp.startup.register(hook)

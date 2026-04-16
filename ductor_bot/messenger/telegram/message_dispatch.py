@@ -189,6 +189,23 @@ class StreamingDispatch:
     scene_config: SceneConfig | None = None
 
 
+_NO_RESPONSE_PATTERNS = frozenset(
+    {
+        "no response requested",
+        "no response needed",
+        "nothing to do",
+        "no action needed",
+        "no action required",
+    }
+)
+
+
+def _is_empty_response(text: str) -> bool:
+    """Return True if the model produced no useful output."""
+    stripped = text.strip().rstrip(".").lower()
+    return not stripped or stripped in _NO_RESPONSE_PATTERNS
+
+
 async def run_non_streaming_message(
     dispatch: NonStreamingDispatch,
 ) -> str:
@@ -211,6 +228,9 @@ async def run_non_streaming_message(
 
         footer = _build_footer(result, dispatch.scene_config)
         result.text += footer
+        if _is_empty_response(result.text):
+            logger.warning("Empty or no-op response from model, sending fallback")
+            result.text = "_(error: no response from model — please try again)_"
         reply_id = dispatch.reply_to.message_id if dispatch.reply_to else None
         await send_rich(
             dispatch.bot,
@@ -365,6 +385,10 @@ async def run_streaming_message(  # noqa: C901, PLR0915
             result.stream_fallback,
             editor.has_content,
         )
+
+        if _is_empty_response(result.text):
+            logger.warning("Empty or no-op response from model, sending fallback")
+            result.text = "_(error: no response from model — please try again)_"
 
         if result.stream_fallback or not streamed_text_sent or not editor.has_content:
             await send_rich(

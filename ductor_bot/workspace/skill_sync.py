@@ -39,6 +39,7 @@ _SKIP_DIRS: frozenset[str] = frozenset(
 _SKILL_SYNC_INTERVAL = 30.0
 _MANAGED_MARKER = ".ductor_managed"
 _SYNCABLE_PROVIDERS: frozenset[str] = frozenset({"claude", "codex", "gemini"})
+_EXCLUDES_FILE = ".skill-excludes"
 
 
 def _load_skill_sync_config(config_path: Path) -> tuple[bool, frozenset[str]]:
@@ -302,6 +303,23 @@ def _clean_broken_links(directory: Path) -> int:
 # ---------------------------------------------------------------------------
 
 
+def _load_excludes(skills_dir: Path) -> frozenset[str]:
+    """Return skill names listed in the directory's ``.skill-excludes`` file.
+
+    Each non-empty, non-comment line is a skill name to block from sync.
+    Returns an empty set if the file does not exist.
+    """
+    excludes_path = skills_dir / _EXCLUDES_FILE
+    if not excludes_path.is_file():
+        return frozenset()
+    names: set[str] = set()
+    for line in excludes_path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            names.add(line)
+    return frozenset(names)
+
+
 def _should_skip_link(dest: Path, sync_roots: frozenset[Path]) -> bool:
     """Return ``True`` if *dest* should be left alone during symlink sync."""
     if dest.exists() and not dest.is_symlink():
@@ -338,6 +356,9 @@ def _link_skill_everywhere(
             base_dir.mkdir(parents=True, exist_ok=True)
         dest = base_dir / skill_name
         if dest == canonical:
+            continue
+        if skill_name in _load_excludes(base_dir):
+            logger.debug("Skill %s excluded from %s", skill_name, loc_name)
             continue
         skip = _should_skip_copy(dest) if use_copies else _should_skip_link(dest, sync_roots)
         if skip:
@@ -457,7 +478,11 @@ def sync_bundled_skills(paths: DuctorPaths, *, docker_active: bool = False) -> N
     Real directories are never overwritten (preserves user modifications
     from older Zone 3 copies or manually created skills with the same name).
     """
+    excludes = _load_excludes(paths.skills_dir)
     for source, target in _iter_bundled_entries(paths):
+        if source.name in excludes:
+            logger.debug("Bundled skill %s excluded from %s", source.name, paths.skills_dir)
+            continue
         if docker_active:
             try:
                 if _ensure_copy(target, source):
