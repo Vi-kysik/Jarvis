@@ -33,6 +33,14 @@ from ductor_bot.cli.stream_events import (
 _EXEC_PATH = "ductor_bot.cli.executor.asyncio.create_subprocess_exec"
 
 
+@pytest.fixture(autouse=True)
+def _default_non_windows_cli(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep platform-sensitive command tests stable on Windows hosts."""
+    monkeypatch.setattr("ductor_bot.cli.base._IS_WINDOWS", False)
+    monkeypatch.setattr("ductor_bot.cli.executor._IS_WINDOWS", False)
+    monkeypatch.setattr("ductor_bot.cli.claude_provider._IS_WINDOWS", False)
+
+
 def _make_cli(
     monkeypatch: pytest.MonkeyPatch,
     *,
@@ -67,6 +75,7 @@ def _fake_process(
     proc.returncode = returncode
     proc.pid = 12345
     proc.kill = MagicMock()
+    proc.stdin = MagicMock()
     return proc
 
 
@@ -81,6 +90,7 @@ def _fake_streaming_process(
     proc.returncode = returncode
     proc.kill = MagicMock()
     proc.wait = AsyncMock(return_value=returncode)
+    proc.stdin = MagicMock()
 
     line_iter = iter([*lines, b""])
     proc.stdout = MagicMock()
