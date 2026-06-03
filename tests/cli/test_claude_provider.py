@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -360,6 +361,23 @@ class TestSend:
         assert "sandbox-1" in called_cmd
         assert resp.result == "OK"
 
+    async def test_windows_docker_keeps_stdin_open(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.setattr("ductor_bot.cli.claude_provider._IS_WINDOWS", True)
+        cli = _make_cli(monkeypatch, docker_container="sandbox-1")
+        wrapped = (["docker", "exec", "-i", "sandbox-1", "claude"], None)
+        response = _parse_response(json.dumps({"result": "OK"}).encode(), b"", 0)
+
+        with (
+            patch("ductor_bot.cli.claude_provider.docker_wrap", return_value=wrapped) as wrap,
+            patch(
+                "ductor_bot.cli.claude_provider.run_oneshot_subprocess",
+                AsyncMock(return_value=response),
+            ),
+        ):
+            await cli.send("hello")
+
+        assert wrap.call_args.kwargs["interactive"] is True
+
     async def test_stderr_captured_in_response(self, monkeypatch: pytest.MonkeyPatch) -> None:
         cli = _make_cli(monkeypatch)
         data = {"result": "ok", "is_error": False}
@@ -536,6 +554,27 @@ class TestSendStreaming:
         called_cmd = mock_exec.call_args[0]
         assert "stream-json" in called_cmd
         assert "--verbose" in called_cmd
+
+    async def test_windows_docker_streaming_keeps_stdin_open(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        monkeypatch.setattr("ductor_bot.cli.claude_provider._IS_WINDOWS", True)
+        cli = _make_cli(monkeypatch, docker_container="sandbox-1")
+        wrapped = (["docker", "exec", "-i", "sandbox-1", "claude"], None)
+
+        async def _empty_stream(
+            *_args: object, **_kwargs: object
+        ) -> AsyncGenerator[StreamEvent, None]:
+            if False:
+                yield ResultEvent(type="result")
+
+        with (
+            patch("ductor_bot.cli.claude_provider.docker_wrap", return_value=wrapped) as wrap,
+            patch("ductor_bot.cli.claude_provider.run_streaming_subprocess", _empty_stream),
+        ):
+            await _collect_stream(cli)
+
+        assert wrap.call_args.kwargs["interactive"] is True
 
     async def test_stderr_truncated_at_500_chars(self, monkeypatch: pytest.MonkeyPatch) -> None:
         cli = _make_cli(monkeypatch)
