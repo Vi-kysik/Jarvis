@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
-from collections.abc import AsyncGenerator
+import os
+from collections.abc import AsyncGenerator, Mapping
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -29,12 +31,19 @@ _DEFAULT_TIMEOUT = 300.0  # 5 minutes, matches agy --print-timeout default
 class AntigravityCLI(BaseCLI):
     """Async wrapper around the Antigravity CLI (agy).
 
-    agy has no headless streaming protocol: ``--print`` returns the whole
-    answer in one shot and ``--prompt-interactive`` is a bubbletea TUI that
-    requires a real ``/dev/tty``, which a subprocess does not have. Both
-    :meth:`send` and :meth:`send_streaming` therefore drive the same
-    ``--print`` command; streaming just re-emits the one-shot answer as a
-    single text delta plus a final result event.
+    agy has no headless streaming protocol: ``--print`` is one-shot and
+    ``--prompt-interactive`` is a bubbletea TUI that needs a real ``/dev/tty``
+    a subprocess does not have. Both :meth:`send` and :meth:`send_streaming`
+    drive the same ``--print`` command.
+
+    ``agy --print`` also silently drops its stdout when stdout is not a TTY
+    (pipe/subprocess/redirect) -- upstream bug
+    ``google-antigravity/antigravity-cli#76``. The answer is therefore read
+    back from agy's own per-conversation transcript
+    (``<home>/.gemini/antigravity-cli/brain/<conv-id>/.system_generated/logs/transcript.jsonl``),
+    taking the final ``source=MODEL, type=PLANNER_RESPONSE, status=DONE``
+    entry's ``content`` -- the clean answer without the intermediate tool-call
+    narration. stdout is used only as a fallback.
 
     agy flags reference:
       --print / -p <prompt>   Non-interactive single-shot
@@ -55,12 +64,28 @@ class AntigravityCLI(BaseCLI):
 
     def _build_command(
         self,
+        prompt: str,
         *,
         resume_session: str | None = None,
         continue_session: bool = False,
     ) -> list[str]:
-        """Build the ``agy --print`` command list (prompt appended by caller)."""
-        cmd = [self._cli, "--print"]
+        """Build the full ``agy`` command.
+
+        ``--print`` is a string flag that consumes the *next* token as the
+        prompt, so it must come last with the prompt immediately after it.
+        Otherwise ``agy --print --model X <prompt>`` makes agy treat
+        ``--model`` as the prompt and silently drops both the real prompt and
+        the requested model (falling back to its default).
+        """
+        cmd = [self._cli]
+
+        # Ground agy in ductor's per-agent workspace so its tools operate there
+        # instead of falling back to agy's own scratch sandbox
+        # (~/.gemini/antigravity-cli/scratch). Because agy keys conversations by
+        # cwd, this also keeps main agent, sub-agents and topics that use
+        # distinct working dirs isolated -- and matches the cwd the transcript
+        # reader resolves the answer from.
+        cmd += ["--add-dir", str(self._working_dir)]
 
         if self._config.model and self._config.model not in ANTIGRAVITY_MODELS:
             cmd += ["--model", self._config.model]
@@ -76,6 +101,9 @@ class AntigravityCLI(BaseCLI):
             cmd += ["--dangerously-skip-permissions"]
 
         cmd.extend(self._config.cli_parameters)
+
+        # --print and its prompt value MUST be last and adjacent (see docstring).
+        cmd += ["--print", prompt]
         return cmd
 
     def _host_command(self, cmd: list[str]) -> tuple[list[str], str]:
@@ -128,23 +156,23 @@ class AntigravityCLI(BaseCLI):
         """Send a prompt via ``agy --print`` and return the full response."""
         effective_timeout = timeout_seconds or _DEFAULT_TIMEOUT
         cmd = self._build_command(
+            prompt,
             resume_session=resume_session,
             continue_session=continue_session,
         )
-        # --print takes prompt as a positional argument
-        cmd.append(prompt)
 
         cmd, cwd = self._host_command(cmd)
         safe_cmd = _safe_command_for_logging(cmd)
         logger.debug("Antigravity send: %s", safe_cmd)
 
+        env = build_subprocess_env(self._config)
         proc = await asyncio.create_subprocess_exec(
             *cmd,
             stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=cwd,
-            env=build_subprocess_env(self._config),
+            env=env,
             creationflags=_CREATION_FLAGS,
         )
 
@@ -181,7 +209,16 @@ class AntigravityCLI(BaseCLI):
         stdout = stdout_bytes.decode(errors="replace") if stdout_bytes else ""
         stderr = stderr_bytes.decode(errors="replace") if stderr_bytes else ""
 
-        result_text = parse_antigravity_json(stdout)
+        # agy --print silently drops stdout in non-TTY subprocesses (upstream
+        # bug antigravity-cli#76), so prefer agy's own transcript file, which
+        # also yields the clean final answer without tool-call narration.
+        # stdout is the fallback for environments/versions where it works.
+        transcript_answer = _read_transcript_answer(self._working_dir, env)
+        if transcript_answer is not None:
+            logger.debug("Antigravity answer read from transcript")
+            result_text = transcript_answer
+        else:
+            result_text = parse_antigravity_json(stdout)
         is_error = proc.returncode not in (None, 0)
 
         return CLIResponse(
@@ -237,3 +274,112 @@ def _safe_command_for_logging(cmd: list[str]) -> list[str]:
     if "--print" in cmd and safe:
         safe[-1] = "<prompt>"
     return safe
+
+
+# -- Transcript reading (workaround for antigravity-cli#76) --------------------
+#
+# ``agy --print`` completes the model round-trip but writes nothing to stdout
+# when stdout is not a TTY (pipe/subprocess). It persists the full turn to a
+# per-conversation JSONL transcript instead, so the answer is read from there.
+# See https://github.com/google-antigravity/antigravity-cli/issues/76
+
+
+def _agy_state_root(env: Mapping[str, str] | None = None) -> Path:
+    """Locate agy's per-user state dir, cross-platform.
+
+    agy stores conversations under ``<home>/.gemini/antigravity-cli`` where
+    ``<home>`` is the user's home directory on every platform -- ``HOME`` on
+    Linux/macOS, ``USERPROFILE`` on Windows. It is derived from the same
+    environment handed to the agy subprocess so ductor reads exactly where agy
+    wrote, falling back to the current user's home.
+    """
+    source = env if env is not None else os.environ
+    home = source.get("USERPROFILE") or source.get("HOME")
+    base = Path(home) if home else Path.home()
+    return base / ".gemini" / "antigravity-cli"
+
+
+def _read_transcript_answer(working_dir: Path, env: Mapping[str, str] | None = None) -> str | None:
+    """Return agy's final answer for *working_dir* from its transcript, or None.
+
+    The answer is the last ``source=MODEL, type=PLANNER_RESPONSE, status=DONE``
+    entry's ``content`` -- already free of the intermediate tool-call steps.
+    """
+    brain_dir = _resolve_brain_dir(working_dir, env)
+    if brain_dir is None:
+        return None
+    transcript = brain_dir / ".system_generated" / "logs" / "transcript.jsonl"
+    try:
+        raw = transcript.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+
+    answer: str | None = None
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        try:
+            entry = json.loads(stripped)
+        except json.JSONDecodeError:
+            continue
+        if (
+            isinstance(entry, dict)
+            and entry.get("source") == "MODEL"
+            and entry.get("type") == "PLANNER_RESPONSE"
+            and entry.get("status") == "DONE"
+        ):
+            content = entry.get("content")
+            if isinstance(content, str) and content.strip():
+                answer = content
+    return answer
+
+
+def _resolve_brain_dir(working_dir: Path, env: Mapping[str, str] | None = None) -> Path | None:
+    """Locate the ``brain/<conv-id>`` dir for *working_dir*'s latest turn."""
+    root = _agy_state_root(env)
+    brain_root = root / "brain"
+
+    conv_id = _conv_id_for_cwd(root, working_dir)
+    if conv_id:
+        candidate = brain_root / conv_id
+        if candidate.is_dir():
+            return candidate
+
+    return _newest_brain_dir(brain_root)
+
+
+def _conv_id_for_cwd(root: Path, working_dir: Path) -> str | None:
+    """Map a working directory to its conversation id via agy's cwd cache."""
+    mapping_path = root / "cache" / "last_conversations.json"
+    try:
+        mapping = json.loads(mapping_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(mapping, dict):
+        return None
+    for key in (str(working_dir), os.path.realpath(working_dir)):
+        conv = mapping.get(key)
+        if isinstance(conv, str) and conv:
+            return conv
+    return None
+
+
+def _newest_brain_dir(brain_root: Path) -> Path | None:
+    """Return the conversation dir with the most recently written transcript."""
+    try:
+        candidates = [entry for entry in brain_root.iterdir() if entry.is_dir()]
+    except OSError:
+        return None
+    best: Path | None = None
+    best_mtime = -1.0
+    for directory in candidates:
+        transcript = directory / ".system_generated" / "logs" / "transcript.jsonl"
+        try:
+            mtime = transcript.stat().st_mtime
+        except OSError:
+            continue
+        if mtime > best_mtime:
+            best_mtime = mtime
+            best = directory
+    return best
