@@ -583,9 +583,9 @@ class ModelRegistry:
     def provider_for(model_id: str) -> str:
         """Return the provider for a model ID.
 
-        Claude Code accepts both short aliases (opus/sonnet/haiku) and full
-        model IDs (``claude-opus-4-7``), so any ``claude-`` prefix routes
-        to Claude.
+        Claude Code accepts both the short aliases in ``CLAUDE_MODELS`` and
+        full model IDs (``claude-opus-4-7``), so any ``claude-`` prefix
+        routes to Claude.
         """
         if model_id in CLAUDE_MODELS or model_id.startswith("claude-"):
             return "claude"
