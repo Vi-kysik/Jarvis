@@ -219,7 +219,8 @@ async def model_selector_start(
     if "antigravity" in authed:
         buttons.append(Button(text="ANTIGRAVITY", callback_data="ms:p:antigravity"))
 
-    keyboard = ButtonGrid(rows=[buttons])
+    provider_rows = [buttons[i : i + 2] for i in range(0, len(buttons), 2)]
+    keyboard = ButtonGrid(rows=provider_rows)
     return SelectorResponse(text=f"{header}\n\n{t('model.pick_provider')}", buttons=keyboard)
 
 
