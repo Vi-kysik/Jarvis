@@ -712,6 +712,22 @@ async def test_topic_abort_skips_recovery(orch: Orchestrator) -> None:
     assert mock_execute.call_count == 1
 
 
+async def test_topic_abort_error_response_skips_chat_wide_reset(orch: Orchestrator) -> None:
+    """Non-SIGKILL error after a topic /stop must not fall through to kill_all."""
+    key = SessionKey(chat_id=1, topic_id=42)
+    mock_execute = AsyncMock(
+        return_value=_mock_response(is_error=True, result="boom", returncode=1),
+    )
+    object.__setattr__(orch._cli_service, "execute", mock_execute)
+    kill_all = AsyncMock(return_value=0)
+    object.__setattr__(orch._process_registry, "kill_all", kill_all)
+    orch._process_registry._aborted_topics.add((1, 42))
+
+    result = await normal(orch, key, "Hello")
+    assert result.text == ""
+    kill_all.assert_not_awaited()
+
+
 async def test_streaming_abort_skips_retry(orch: Orchestrator) -> None:
     """When process is aborted (via /stop), normal_streaming() returns empty instead of retrying."""
     mock_exec = AsyncMock(return_value=_mock_response())
