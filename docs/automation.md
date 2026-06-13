@@ -109,7 +109,8 @@ Per-job override fields in `cron_jobs.json`:
   "cli_parameters": ["--debug"],
   "quiet_start": 22,
   "quiet_end": 7,
-  "dependency": "nightly-reports"
+  "dependency": "nightly-reports",
+  "silent_on_success": true
 }
 ```
 
@@ -120,6 +121,8 @@ Notes:
 - cron status includes `error:cli_not_found_<provider>` for missing provider binaries.
 - `error:folder_missing` updates `last_run_status` but does not emit a result callback.
 - quiet-hour skips do not emit result callbacks and do not update `last_run_status`.
+- `silent_on_success` (default `false`) suppresses the result callback when the run succeeds (status `success`) but still updates `last_run_status`; failures are always delivered.
+- routing fields (`chat_id`, `topic_id`, `transport`) can be redirected on an existing job via the `cron_edit` tool (`--chat-id`, `--topic-id`, `--transport`, `--clear-topic-id`); `cron_add` seeds them from the creating chat/topic.
 
 ## Webhooks
 

@@ -106,6 +106,7 @@ Changes take effect on the next CLI invocation (mtime-based cache invalidation, 
 | `scene` | `SceneConfig` | see below | Scene indicators and technical footer |
 | `notifications` | `NotificationsConfig` | see below | Targeted startup/upgrade notification routing |
 | `transcription` | `TranscriptionConfig` | see below | External audio/video transcription command hooks |
+| `skills` | `SkillsConfig` | see below | Cross-tool skill sync toggles (global + per-provider) |
 | `update_check` | `bool` | `true` | Enables periodic update observer (`UpdateObserver`) |
 | `interagent_port` | `int` | `8799` | Port for internal localhost API (`InternalAgentAPI`) |
 
@@ -480,6 +481,23 @@ Runtime note (`Orchestrator._start_api_server` + `ApiServer._authenticate`):
   - `{"type":"auth","chat_id":...}` (positive int),
   - optional `channel_id` (positive int) for per-channel session isolation (`SessionKey.topic_id`),
 - clients can override only for that connection; persisted default stays in config.
+
+## `SkillsConfig`
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `sync_enabled` | `bool` | `true` | Global toggle for cross-tool skill sync; when `false`, `sync_skills` returns early and no sync runs |
+| `sync` | `SkillSyncProviders` | see below | Per-provider sync toggles |
+
+### `SkillSyncProviders`
+
+| Field | Type | Default | Notes |
+|---|---|---|---|
+| `claude` | `bool` | `true` | Include `~/.claude/skills` in cross-tool sync |
+| `codex` | `bool` | `true` | Include `~/.codex/skills` (or `$CODEX_HOME/skills`) in cross-tool sync |
+| `gemini` | `bool` | `true` | Include `~/.gemini/skills` in cross-tool sync |
+
+Toggles are read live from `config.json` on each skill-sync tick (independent of `ConfigReloader`), so changes take effect within one sync interval without restart. A disabled provider is dropped from the sync, so its skill dir is neither linked into nor used as a source; existing ductor-created links are not actively removed (cleared on shutdown cleanup or manually).
 
 ## Runtime hot-reload (`config_reload.py`)
 
