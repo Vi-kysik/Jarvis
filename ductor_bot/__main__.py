@@ -46,6 +46,7 @@ from ductor_bot.config import (
     deep_merge_config,
 )
 from ductor_bot.i18n import t_rich
+from ductor_bot.infra.env_secrets import resolve_env_placeholders
 from ductor_bot.infra.json_store import atomic_json_save
 from ductor_bot.workspace.init import init_workspace
 from ductor_bot.workspace.paths import resolve_paths
@@ -151,7 +152,8 @@ def load_config() -> AgentConfig:
         logger.info("Extended config with new default fields")
 
     init_workspace(paths)
-    return AgentConfig.model_validate(merged)
+    resolved = resolve_env_placeholders(merged, paths.env_file)
+    return AgentConfig.model_validate(resolved)
 
 
 # ---------------------------------------------------------------------------

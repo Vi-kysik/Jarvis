@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING
 
 from ductor_bot.cli.process_registry import ProcessRegistry
 from ductor_bot.config import AgentConfig, update_config_file_async
+from ductor_bot.infra.env_secrets import resolve_env_placeholders
 from ductor_bot.infra.file_watcher import FileWatcher
 from ductor_bot.infra.restart import EXIT_RESTART
 from ductor_bot.multiagent.health import AgentHealth
@@ -554,7 +555,8 @@ class AgentSupervisor:
 
         try:
             raw = self._config_path.read_text(encoding="utf-8")
-            new_config = AgentConfig(**json.loads(raw))
+            resolved = resolve_env_placeholders(json.loads(raw), self._main_paths.env_file)
+            new_config = AgentConfig(**resolved)
         except Exception:
             logger.warning("config.json changed but failed to parse — skipping restart")
             return

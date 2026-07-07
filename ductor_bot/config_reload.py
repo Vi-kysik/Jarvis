@@ -26,6 +26,7 @@ from typing import Any
 from pydantic import ValidationError
 
 from ductor_bot.config import AgentConfig
+from ductor_bot.infra.env_secrets import resolve_env_placeholders
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +202,10 @@ class ConfigReloader:
         try:
             raw = await asyncio.to_thread(self._path.read_text, "utf-8")
             data = json.loads(raw)
-            return AgentConfig(**data)
+            # config_path is <ductor_home>/config/config.json; .env lives at <ductor_home>/.env.
+            env_file = self._path.parent.parent / ".env"
+            resolved = resolve_env_placeholders(data, env_file)
+            return AgentConfig(**resolved)
         except (OSError, json.JSONDecodeError) as exc:
             logger.warning("Config reload failed (file error): %s", exc)
             return None

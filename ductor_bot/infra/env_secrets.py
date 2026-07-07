@@ -17,9 +17,16 @@ effect on the next CLI invocation without a bot restart.
 from __future__ import annotations
 
 import logging
-from pathlib import Path
+import os
+import re
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+_PLACEHOLDER_RE = re.compile(r"^\$\{([A-Za-z_][A-Za-z0-9_]*)\}$")
 
 _cache: dict[str, str] | None = None
 _cache_path: Path | None = None
@@ -107,3 +114,33 @@ def clear_cache() -> None:
     _cache = None
     _cache_path = None
     _cache_mtime = 0.0
+
+
+def resolve_env_placeholders(data: object, env_file: Path) -> object:
+    """Recursively resolve ``"${VAR_NAME}"`` string values in *data*.
+
+    Looks up ``VAR_NAME`` in the real process environment first, then in
+    *env_file* (``~/.jarvis/.env``). Unresolved placeholders are replaced
+    with ``""`` so config validation fails loudly (missing token) instead
+    of silently keeping the literal ``${...}`` string.
+
+    Only exact whole-string matches (``"${VAR}"``, not ``"foo ${VAR}"``)
+    are treated as placeholders — this keeps normal config strings safe.
+    """
+    if isinstance(data, dict):
+        return {key: resolve_env_placeholders(value, env_file) for key, value in data.items()}
+    if isinstance(data, list):
+        return [resolve_env_placeholders(item, env_file) for item in data]
+    if isinstance(data, str):
+        match = _PLACEHOLDER_RE.match(data)
+        if match is None:
+            return data
+        var_name = match.group(1)
+        if var_name in os.environ:
+            return os.environ[var_name]
+        secrets = load_env_secrets(env_file)
+        if var_name in secrets:
+            return secrets[var_name]
+        logger.warning("Config placeholder ${%s} not found in environment or %s", var_name, env_file)
+        return ""
+    return data
