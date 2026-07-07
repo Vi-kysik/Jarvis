@@ -3,7 +3,7 @@ requires = ["hatchling>=1.28.0"]
 build-backend = "hatchling.build"
 
 [project]
-name = "albert"
+name = "jarvis"
 version = "0.18.2"
 description = "AI assistant with multi-agent orchestration, Telegram/Discord support, sessions, cron jobs, webhooks."
 readme = "README.md"
@@ -12,7 +12,7 @@ license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Yegor Antonyuk" }]
 keywords = [
-    "albert", "ai", "telegram", "discord", "bot", "agent",
+    "jarvis", "ai", "telegram", "discord", "bot", "agent",
     "claude", "cli", "automation", "streaming",
 ]
 classifiers = [
@@ -76,7 +76,7 @@ Issues = "https://github.com/PleasePrompto/ductor/issues"
 Changelog = "https://github.com/PleasePrompto/ductor/releases"
 
 [project.scripts]
-albert = "ductor_bot.__main__:main"
+jarvis = "ductor_bot.__main__:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ductor_bot"]

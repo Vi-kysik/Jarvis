@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 InstallMode = Literal["pipx", "uv", "pip", "dev"]
 
-_PACKAGE_NAME = "albert"
+_PACKAGE_NAME = "jarvis"
 
 
 def detect_install_mode() -> InstallMode:

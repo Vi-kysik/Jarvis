@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/ductor_bot/messenger/telegram/ductor_images/logo_text.png" alt="albert" width="100%" />
+  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/ductor_bot/messenger/telegram/ductor_images/logo_text.png" alt="jarvis" width="100%" />
 </p>
 
 <p align="center">
-  <strong>Albert — Claude Code, Codex CLI, Gemini CLI, and Antigravity CLI as your coding assistant — on Telegram, Matrix, and Discord.</strong><br>
+  <strong>Jarvis — Claude Code, Codex CLI, Gemini CLI, and Antigravity CLI as your coding assistant — on Telegram, Matrix, and Discord.</strong><br>
   Uses only official CLIs. Nothing spoofed, nothing proxied. Multi-transport, automation, and sub-agents in one runtime.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Yegorantonyuk/Albert/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Yegorantonyuk/Albert" alt="License" /></a>
+  <a href="https://github.com/Vi-kysik/Jarvis/blob/main/LICENSE"><img src="https://img.shields.io/github/license/Vi-kysik/Jarvis" alt="License" /></a>
 </p>
 
 <p align="center">
@@ -21,24 +21,24 @@
 ---
 
 > [!IMPORTANT]
-> **Claude `-p` billing changed (effective 2026-06-15):** Anthropic moved Claude Code headless mode (`claude -p`) out of the Pro/Max/Team/Enterprise subscription pool. Albert's Claude provider runs headless, so on a Claude **subscription** these calls now count as extra/paid usage at standard API rates (the interactive TUI stays in the subscription). The `-p` flag still works; only billing changed. A clean console-based approach is being evaluated. In the meantime you can use **Codex** or **AGY (Antigravity)** as the provider — those are unaffected. Details and status: [#154](https://github.com/PleasePrompto/ductor/issues/154).
+> **Claude `-p` billing changed (effective 2026-06-15):** Anthropic moved Claude Code headless mode (`claude -p`) out of the Pro/Max/Team/Enterprise subscription pool. Jarvis's Claude provider runs headless, so on a Claude **subscription** these calls now count as extra/paid usage at standard API rates (the interactive TUI stays in the subscription). The `-p` flag still works; only billing changed. A clean console-based approach is being evaluated. In the meantime you can use **Codex** or **AGY (Antigravity)** as the provider — those are unaffected. Details and status: [#154](https://github.com/PleasePrompto/ductor/issues/154).
 
-If you want to control Claude Code, Google's Gemini CLI, OpenAI's Codex CLI, or Antigravity CLI via Telegram, Matrix, or Discord, build automations, or manage multiple agents easily — Albert is the right tool for you. The messaging layer is modular: Telegram, Matrix, and Discord ship today, and new transports plug into the same transport-agnostic core.
+If you want to control Claude Code, Google's Gemini CLI, OpenAI's Codex CLI, or Antigravity CLI via Telegram, Matrix, or Discord, build automations, or manage multiple agents easily — Jarvis is the right tool for you. The messaging layer is modular: Telegram, Matrix, and Discord ship today, and new transports plug into the same transport-agnostic core.
 
-Albert runs on your machine and sends simple console commands as if you were typing them yourself, so you can use your active subscriptions (Claude Max, Google AI Ultra, etc.) directly. No API proxying, no SDK patching, no spoofed headers. Just the official CLIs, executed as subprocesses, with all state kept in plain JSON and Markdown under `~/.albert/`.
+Jarvis runs on your machine and sends simple console commands as if you were typing them yourself, so you can use your active subscriptions (Claude Max, Google AI Ultra, etc.) directly. No API proxying, no SDK patching, no spoofed headers. Just the official CLIs, executed as subprocesses, with all state kept in plain JSON and Markdown under `~/.jarvis/`.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/docs/images/ductor-start.jpeg" alt="Albert /start screen" width="49%" />
-  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/docs/images/ductor-quick-actions.jpeg" alt="Albert quick action buttons" width="49%" />
+  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/docs/images/ductor-start.jpeg" alt="Jarvis /start screen" width="49%" />
+  <img src="https://raw.githubusercontent.com/PleasePrompto/ductor/main/docs/images/ductor-quick-actions.jpeg" alt="Jarvis quick action buttons" width="49%" />
 </p>
 
 ## Quick start
 
 ```bash
-git clone https://github.com/Yegorantonyuk/Albert.git
-cd Albert
+git clone https://github.com/Vi-kysik/Jarvis.git
+cd Jarvis
 pipx install .
-albert
+jarvis
 ```
 
 The onboarding wizard handles CLI checks, transport setup (Telegram, Discord, or Matrix), timezone, optional Docker, and optional background service install.
@@ -53,7 +53,7 @@ Detailed setup: [`docs/installation.md`](docs/installation.md)
 
 ## How chats work
 
-Albert gives you multiple ways to interact with your coding agents. Each level builds on the previous one.
+Jarvis gives you multiple ways to interact with your coding agents. Each level builds on the previous one.
 
 ### 1. Single chat (your main agent)
 
@@ -92,7 +92,7 @@ That's 5 independent conversations from a single group. Your private single chat
 
 Each topic can use a different model. Run `/model` inside a topic to change just that topic's provider.
 
-All chats share the same `~/.albert/` workspace — same tools, same memory, same files. The only thing isolated is the conversation context.
+All chats share the same `~/.jarvis/` workspace — same tools, same memory, same files. The only thing isolated is the conversation context.
 
 ### 3. Named sessions (extra contexts within any chat)
 
@@ -130,10 +130,10 @@ Each task gets its own memory file (`TASKMEMORY.md`) and can be resumed with fol
 Sub-agents are completely separate bots — own chat, own workspace, own memory, own CLI auth, own config settings. Each sub-agent can use a different transport.
 
 ```bash
-albert agents add codex-agent    # creates a new bot (needs its own token)
+jarvis agents add codex-agent    # creates a new bot (needs its own token)
 ```
 
-Sub-agents live under `~/.albert/agents/<name>/` with their own workspace, tools, and memory — fully isolated from the main agent.
+Sub-agents live under `~/.jarvis/agents/<name>/` with their own workspace, tools, and memory — fully isolated from the main agent.
 
 ### Comparison
 
@@ -141,14 +141,14 @@ Sub-agents live under `~/.albert/agents/<name>/` with their own workspace, tools
 |---|---|---|---|---|---|
 | **What it is** | Your main 1:1 chat | One topic = one chat | Extra context in any chat | "Do this while I keep working" | Separate bot, own everything |
 | **Context** | One per provider | One per topic per provider | Own context per session | Own context, result flows back | Fully isolated |
-| **Workspace** | `~/.albert/` | Shared with main | Shared with parent chat | Shared with parent agent | Own under `~/.albert/agents/` |
+| **Workspace** | `~/.jarvis/` | Shared with main | Shared with parent chat | Shared with parent agent | Own under `~/.jarvis/agents/` |
 | **Config** | Main config | Shared with main | Shared with parent chat | Shared with parent agent | Own config |
-| **Setup** | Automatic | Create group + enable topics | `/session <prompt>` | Automatic or "delegate this" | `albert agents add` |
+| **Setup** | Automatic | Create group + enable topics | `/session <prompt>` | Automatic or "delegate this" | `jarvis agents add` |
 
 ### How it all fits together
 
 ```text
-~/.albert/                          ← shared workspace (tools, memory, files)
+~/.jarvis/                          ← shared workspace (tools, memory, files)
   │
   ├── Single chat                   ← main agent, private 1:1
   │     ├── main context
@@ -210,13 +210,13 @@ All transports can run **in parallel** on the same agent:
 
 Each messenger is a self-contained module under `messenger/<name>/` implementing a shared `BotProtocol`. The core (orchestrator, sessions, CLI, cron, etc.) is completely transport-agnostic — it never knows which messenger delivered the message.
 
-Adding a new messenger (Slack, Signal, ...) means implementing `BotProtocol` in a new sub-package and registering it — the rest of Albert works without changes.
+Adding a new messenger (Slack, Signal, ...) means implementing `BotProtocol` in a new sub-package and registering it — the rest of Jarvis works without changes.
 
 ## Auth
 
 ### Telegram
 
-Albert uses a dual-allowlist model. Every message must pass both checks.
+Jarvis uses a dual-allowlist model. Every message must pass both checks.
 
 | Chat type | Check |
 |---|---|
@@ -245,7 +245,7 @@ Matrix auth uses room and user allowlists in the `matrix` config block. The bot 
 
 ## Language
 
-Albert's UI is available in multiple languages. Set in `config.json`:
+Jarvis's UI is available in multiple languages. Set in `config.json`:
 
 ```json
 {"language": "ru"}
@@ -269,7 +269,7 @@ Supported: `en`, `de`, `nl`, `fr`, `ru`, `es`, `pt`. Hot-reloadable.
 | `/sessions` | View/manage active sessions |
 | `/tasks` | View/manage background tasks |
 | `/cron` | Interactive cron management |
-| `/showfiles` | Browse `~/.albert/` |
+| `/showfiles` | Browse `~/.jarvis/` |
 | `/diagnose` | Runtime diagnostics |
 | `/upgrade` | Check/apply updates |
 | `/agents` | Multi-agent status |
@@ -282,39 +282,39 @@ Supported: `en`, `de`, `nl`, `fr`, `ru`, `es`, `pt`. Hot-reloadable.
 ## Common CLI commands
 
 ```bash
-albert                  # Start bot (auto-onboarding if needed)
-albert onboarding       # Re-run setup wizard
-albert reset            # Full reset + onboarding
-albert stop             # Stop bot
-albert restart          # Restart bot
-albert upgrade          # Upgrade and restart
-albert status           # Runtime status
-albert help             # CLI overview
-albert uninstall        # Remove bot + workspace
+jarvis                  # Start bot (auto-onboarding if needed)
+jarvis onboarding       # Re-run setup wizard
+jarvis reset            # Full reset + onboarding
+jarvis stop             # Stop bot
+jarvis restart          # Restart bot
+jarvis upgrade          # Upgrade and restart
+jarvis status           # Runtime status
+jarvis help             # CLI overview
+jarvis uninstall        # Remove bot + workspace
 
-albert service install  # Install as background service
-albert service status   # Show service status
-albert service start    # Start service
-albert service stop     # Stop service
-albert service logs     # View service logs
-albert service uninstall
+jarvis service install  # Install as background service
+jarvis service status   # Show service status
+jarvis service start    # Start service
+jarvis service stop     # Stop service
+jarvis service logs     # View service logs
+jarvis service uninstall
 
-albert docker enable    # Enable Docker sandbox
-albert docker rebuild   # Rebuild sandbox container
-albert docker mount /p  # Add host mount
+jarvis docker enable    # Enable Docker sandbox
+jarvis docker rebuild   # Rebuild sandbox container
+jarvis docker mount /p  # Add host mount
 
-albert agents list      # List configured sub-agents
-albert agents add NAME  # Add a sub-agent
-albert agents remove NAME
+jarvis agents list      # List configured sub-agents
+jarvis agents add NAME  # Add a sub-agent
+jarvis agents remove NAME
 
-albert install matrix   # Install Matrix transport extra
-albert install api      # Install API extra
+jarvis install matrix   # Install Matrix transport extra
+jarvis install api      # Install API extra
 ```
 
 ## Workspace layout
 
 ```text
-~/.albert/
+~/.jarvis/
   config/config.json                 # Bot configuration
   sessions.json                      # Chat session state
   tasks.json                         # Background task registry
@@ -334,9 +334,9 @@ albert install api      # Install API extra
 
 Full config reference: [`docs/config.md`](docs/config.md) — full example: [`config.example.json`](config.example.json)
 
-## Why Albert?
+## Why Jarvis?
 
-Other projects manipulate SDKs or patch CLIs and risk violating provider terms of service. Albert simply runs the official CLI binaries as subprocesses — nothing more.
+Other projects manipulate SDKs or patch CLIs and risk violating provider terms of service. Jarvis simply runs the official CLI binaries as subprocesses — nothing more.
 
 - Official CLIs only (`claude`, `codex`, `gemini`, `agy`)
 - Rule files are plain Markdown (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`)
@@ -345,7 +345,7 @@ Other projects manipulate SDKs or patch CLIs and risk violating provider terms o
 
 ## Disclaimer
 
-Albert runs official provider CLIs and does not impersonate provider clients. Validate your own compliance requirements before unattended automation.
+Jarvis runs official provider CLIs and does not impersonate provider clients. Validate your own compliance requirements before unattended automation.
 
 - [Anthropic Terms](https://www.anthropic.com/policies/terms)
 - [OpenAI Terms](https://openai.com/policies/terms-of-use)

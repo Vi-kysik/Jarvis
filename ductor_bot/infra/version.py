@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 _PYPI_URL = "https://pypi.org/pypi/ductor/json"
 _GITHUB_RELEASES_URL = "https://api.github.com/repos/PleasePrompto/ductor/releases"
-_PACKAGE_NAME = "albert"
+_PACKAGE_NAME = "jarvis"
 _TIMEOUT = aiohttp.ClientTimeout(total=10)
 
 

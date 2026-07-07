@@ -180,7 +180,7 @@ def resolve_paths(
     else:
         home = (
             Path(
-                os.environ.get("DUCTOR_HOME", str(Path.home() / ".albert")),
+                os.environ.get("DUCTOR_HOME", str(Path.home() / ".jarvis")),
             )
             .expanduser()
             .resolve()

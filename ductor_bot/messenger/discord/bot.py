@@ -225,7 +225,7 @@ class DiscordBot:
         except ImportError:
             raise ImportError(
                 "discord.py is required for Discord transport. "
-                "Install with: pip install 'albert[discord]'"
+                "Install with: pip install 'jarvis[discord]'"
             ) from None
 
         self._config = config
