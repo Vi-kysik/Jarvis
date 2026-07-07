@@ -23,7 +23,7 @@ class RulesSelector:
     - RULES-gemini-only.md (Gemini-specific variant)
     - RULES-all-clis.md (multi-provider variant)
 
-    Deployed naming in ~/.ductor/:
+    Deployed naming in ~/.jarvis/:
     - CLAUDE.md (created if Claude authenticated)
     - AGENTS.md (created if Codex authenticated)
     - GEMINI.md (created if Gemini authenticated)
@@ -130,10 +130,10 @@ class RulesSelector:
         return None
 
     def deploy_rules(self) -> None:
-        """Auto-discover and deploy all rule files to ~/.ductor/.
+        """Auto-discover and deploy all rule files to ~/.jarvis/.
 
         Scans _home_defaults/ for directories with RULES templates, selects
-        the best variant for current auth state, and deploys to ~/.ductor/
+        the best variant for current auth state, and deploys to ~/.jarvis/
         as CLAUDE.md, AGENTS.md, and/or GEMINI.md based on authentication.
 
         Deployment logic:
@@ -232,7 +232,7 @@ class RulesSelector:
                 )
 
     def _remove_files_by_name(self, filename: str) -> int:
-        """Remove all files with given name in ~/.ductor/.
+        """Remove all files with given name in ~/.jarvis/.
 
         Skips files inside ``workspace/cron_tasks/`` — those are user-owned
         rule files created per task and must not be deleted on auth-status

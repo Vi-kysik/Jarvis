@@ -19,7 +19,7 @@ from ductor_bot._home_defaults.workspace.tools._tool_shared import (
 # Re-export so existing tool scripts keep working with ``from _shared import sanitize_name``
 sanitize_name = sanitize_name
 
-DUCTOR_HOME = Path(os.environ.get("DUCTOR_HOME", "~/.ductor")).expanduser()
+DUCTOR_HOME = Path(os.environ.get("DUCTOR_HOME", "~/.jarvis")).expanduser()
 HOOKS_PATH = DUCTOR_HOME / "webhooks.json"
 CONFIG_PATH = DUCTOR_HOME / "config" / "config.json"
 CRON_TASKS_DIR = DUCTOR_HOME / "workspace" / "cron_tasks"

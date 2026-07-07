@@ -334,7 +334,7 @@ class DockerManager:
             name,
             "-w",
             _CONTAINER_WS,
-            # Mount the ENTIRE ~/.ductor so the CLI sees all framework files.
+            # Mount the ENTIRE ~/.jarvis so the CLI sees all framework files.
             "-v",
             f"{ductor_home}:{_DUCTOR_MOUNT}",
             "-e",
@@ -408,7 +408,7 @@ class DockerManager:
         return True
 
     def _env_secret_flags(self) -> list[str]:
-        """Return ``-e`` flags for user secrets from ``~/.ductor/.env``."""
+        """Return ``-e`` flags for user secrets from ``~/.jarvis/.env``."""
         from ductor_bot.infra.env_secrets import load_env_secrets
 
         flags: list[str] = []

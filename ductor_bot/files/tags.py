@@ -105,7 +105,7 @@ _DOCKER_MOUNT = "/ductor"
 def _resolve_container_path(path: Path) -> Path:
     """Translate Docker container paths to host paths.
 
-    Inside the sandbox container ``~/.ductor`` is mounted at ``/ductor``.
+    Inside the sandbox container ``~/.jarvis`` is mounted at ``/ductor``.
     CLI output references container-side paths like
     ``/ductor/workspace/output_to_user/file.png`` which don't exist on the
     host.  This rewrites them to the real host path.
@@ -115,7 +115,7 @@ def _resolve_container_path(path: Path) -> Path:
     except ValueError:
         return path
     ductor_home = Path(
-        os.environ.get("DUCTOR_HOME", str(Path.home() / ".ductor")),
+        os.environ.get("DUCTOR_HOME", str(Path.home() / ".jarvis")),
     ).expanduser()
     return ductor_home / relative
 

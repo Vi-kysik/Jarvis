@@ -28,7 +28,7 @@ class DuctorPaths:
 
     All framework paths are derived from three roots:
 
-    - ``ductor_home``:    User data directory (default ``~/.ductor``).
+    - ``ductor_home``:    User data directory (default ``~/.jarvis``).
     - ``home_defaults``:  Bundled template that mirrors ``ductor_home`` (package-internal).
     - ``framework_root``: Repository root (for Dockerfile, config.example.json).
     """
@@ -171,7 +171,7 @@ def resolve_paths(
     """Build DuctorPaths from explicit values, env vars, or defaults.
 
     Args:
-        ductor_home: User data directory. Falls back to ``$DUCTOR_HOME`` or ``~/.ductor``.
+        ductor_home: User data directory. Falls back to ``$DUCTOR_HOME`` or ``~/.jarvis``.
         framework_root: Repository root. Falls back to ``$DUCTOR_FRAMEWORK_ROOT``.
         home_defaults: Template directory. Falls back to ``ductor_bot/_home_defaults/``.
     """

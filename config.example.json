@@ -1,10 +1,10 @@
 {
-    "_comment": "Full example config showing all features. Copy to ~/.ductor/config/config.json and adjust.",
+    "_comment": "Full example config showing all features. Copy to ~/.jarvis/config/config.json and adjust.",
     "log_level": "INFO",
     "provider": "claude",
     "model": "sonnet",
     "language": "en",
-    "ductor_home": "~/.ductor",
+    "ductor_home": "~/.jarvis",
     "user_timezone": "Europe/Berlin",
     "update_check": true,
     "idle_timeout_minutes": 1440,
@@ -50,8 +50,8 @@
     },
     "docker": {
         "enabled": true,
-        "image_name": "ductor-sandbox",
-        "container_name": "ductor-sandbox",
+        "image_name": "jarvis-sandbox",
+        "container_name": "jarvis-sandbox",
         "auto_build": true,
         "mount_host_cache": false,
         "mounts": ["/home/you/projects"],

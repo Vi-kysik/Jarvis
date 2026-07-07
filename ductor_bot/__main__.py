@@ -103,7 +103,7 @@ def load_config() -> AgentConfig:
     """Load, auto-create, and smart-merge the bot config.
 
     Resolution order:
-    1. ``~/.ductor/config/config.json`` (canonical location)
+    1. ``~/.jarvis/config/config.json`` (canonical location)
     2. Copy from ``config.example.json`` in the framework root on first start
     3. Fall back to Pydantic defaults if example file is missing
 

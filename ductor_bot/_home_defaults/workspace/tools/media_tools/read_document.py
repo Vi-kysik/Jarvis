@@ -23,7 +23,7 @@ _TEXT_EXTENSIONS = frozenset({
 
 _MAX_TEXT_CHARS = 100_000
 _TELEGRAM_FILES = Path(
-    os.environ.get("DUCTOR_HOME", str(Path.home() / ".ductor"))
+    os.environ.get("DUCTOR_HOME", str(Path.home() / ".jarvis"))
 ).expanduser() / "workspace" / "telegram_files"
 
 

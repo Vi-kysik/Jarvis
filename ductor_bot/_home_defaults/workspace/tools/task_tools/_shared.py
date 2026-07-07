@@ -13,8 +13,8 @@ from pathlib import Path
 def detect_agent_name() -> str:
     """Detect the agent name from script path or env var.
 
-    Sub-agent tools live at ``~/.ductor/agents/<name>/workspace/tools/task_tools/``.
-    Main agent tools live at ``~/.ductor/workspace/tools/task_tools/``.
+    Sub-agent tools live at ``~/.jarvis/agents/<name>/workspace/tools/task_tools/``.
+    Main agent tools live at ``~/.jarvis/workspace/tools/task_tools/``.
     The path is the most reliable source — env var is used as fallback.
     """
     # Derive from script path: .../agents/<name>/workspace/tools/task_tools/
@@ -51,7 +51,7 @@ def post_json(url: str, body: dict[str, object], *, timeout: int = 300) -> dict[
             return json.loads(resp.read().decode())  # type: ignore[no-any-return]
     except urllib.error.URLError as e:
         print(f"Error: Cannot reach task API at {url}: {e}", file=sys.stderr)
-        print("Make sure the Ductor bot is running with tasks enabled.", file=sys.stderr)
+        print("Make sure the Jarvis bot is running with tasks enabled.", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)

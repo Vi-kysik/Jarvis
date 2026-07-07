@@ -94,10 +94,10 @@ Observer / TaskHub / InterAgentBus callback
   - Zone 2 overwrite: `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, framework-managed tool scripts
   - Zone 3 seed-once: user-owned files
 - Rule sync is mtime-based for sibling `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`; cron task folders additionally get missing rule backfill.
-- Skill sync spans `~/.ductor/workspace/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.gemini/skills`:
+- Skill sync spans `~/.jarvis/workspace/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.gemini/skills`:
   - normal mode: links/junctions
-  - Docker mode: managed copies (`.ductor_managed`)
-- `ductor agents add` is a Telegram-focused scaffold; Matrix sub-agents are supported through `agents.json` or the bundled agent tool scripts.
+  - Docker mode: managed copies (`.jarvis_managed` marker)
+- `jarvis agents add` is a Telegram-focused scaffold; Matrix sub-agents are supported through `agents.json` or the bundled agent tool scripts.
 
 ## Background Systems
 

@@ -832,7 +832,7 @@ class TelegramBot:
         )
 
     async def _on_showfiles(self, message: Message) -> None:
-        """Handle /showfiles: interactive file browser for ~/.ductor."""
+        """Handle /showfiles: interactive file browser for ~/.jarvis."""
         text, keyboard = await file_browser_start(self._orch.paths)
         await send_rich(
             self._bot,

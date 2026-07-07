@@ -96,7 +96,7 @@ Observer / TaskHub / InterAgentBus callback
 - Rule sync is mtime-based for sibling `CLAUDE.md` / `AGENTS.md` / `GEMINI.md`; cron task folders additionally get missing rule backfill.
 - Skill sync spans `~/.ductor/workspace/skills`, `~/.claude/skills`, `~/.codex/skills`, `~/.gemini/skills`:
   - normal mode: links/junctions
-  - Docker mode: managed copies (`.ductor_managed`)
+  - Docker mode: managed copies (`.jarvis_managed`)
 - `ductor agents add` is a Telegram-focused scaffold; Matrix sub-agents are supported through `agents.json` or the bundled agent tool scripts.
 
 ## Background Systems

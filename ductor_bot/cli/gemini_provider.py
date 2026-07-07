@@ -315,7 +315,7 @@ class GeminiCLI(BaseCLI):
     def _create_system_prompt_path(self) -> str | None:
         """Create a temporary system prompt file when prompt content is present.
 
-        In Docker mode the file is written to ``~/.ductor/tmp/`` which is
+        In Docker mode the file is written to ``~/.jarvis/tmp/`` which is
         bind-mounted into the container so it can be read via a translated
         container-side path.
         """
@@ -366,7 +366,7 @@ class GeminiCLI(BaseCLI):
 
     @staticmethod
     def _host_to_container_path(host_path: str) -> str | None:
-        """Translate a host path under ``~/.ductor/`` to its container mount."""
+        """Translate a host path under ``~/.jarvis/`` to its container mount."""
         prefix = str(resolve_paths().ductor_home)
         if host_path.startswith(prefix):
             return _CONTAINER_DUCTOR + host_path[len(prefix) :].replace("\\", "/")

@@ -30,7 +30,7 @@ Bundled source: `ductor_bot/_home_defaults/workspace/skills/`.
 `sync_bundled_skills(paths)` mirrors bundled skills into each agent's workspace skill dir.
 
 - normal mode: links/junctions
-- Docker mode: managed copies (`.ductor_managed`)
+- Docker mode: managed copies (`.jarvis_managed`)
 
 ## Sync algorithm (`sync_skills`)
 

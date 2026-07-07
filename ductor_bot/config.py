@@ -65,8 +65,8 @@ class DockerConfig(BaseModel):
     """Settings for Docker-based CLI sandboxing."""
 
     enabled: bool = False
-    image_name: str = "ductor-sandbox"
-    container_name: str = "ductor-sandbox"
+    image_name: str = "jarvis-sandbox"
+    container_name: str = "jarvis-sandbox"
     auto_build: bool = True
     mount_host_cache: bool = False
     mounts: list[str] = Field(default_factory=list)

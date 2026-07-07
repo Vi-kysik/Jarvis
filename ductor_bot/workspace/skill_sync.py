@@ -7,7 +7,7 @@ Includes bundled-skill linking (package → workspace), sync-time external-symli
 protection, and cleanup of ductor-created links on shutdown.
 
 When Docker sandboxing is active, symlinks are replaced with directory copies
-(marked with ``.ductor_managed``) because absolute host paths do not resolve
+(marked with ``.jarvis_managed``) because absolute host paths do not resolve
 inside the container's mount namespace.
 
 Sync runs once during ``init_workspace`` and periodically as a background task.
@@ -37,7 +37,7 @@ _SKIP_DIRS: frozenset[str] = frozenset(
 )
 
 _SKILL_SYNC_INTERVAL = 30.0
-_MANAGED_MARKER = ".ductor_managed"
+_MANAGED_MARKER = ".jarvis_managed"
 _SYNCABLE_PROVIDERS: frozenset[str] = frozenset({"claude", "codex", "gemini"})
 _EXCLUDES_FILE = ".skill-excludes"
 
@@ -251,7 +251,7 @@ def _newest_mtime(directory: Path) -> float:
 
 
 def _ensure_copy(dest: Path, source: Path) -> bool:
-    """Copy *source* directory to *dest* with a ``.ductor_managed`` marker.
+    """Copy *source* directory to *dest* with a ``.jarvis_managed`` marker.
 
     Skips the copy when *dest* already has the marker and *source* has not
     been modified since the last copy (recursive mtime comparison).
@@ -471,7 +471,7 @@ def sync_bundled_skills(paths: DuctorPaths, *, docker_active: bool = False) -> N
     """Sync bundled skills from the package into the ductor workspace.
 
     Creates symlinks (or copies when *docker_active*) from
-    ``~/.ductor/workspace/skills/<name>`` to the package's
+    ``~/.jarvis/workspace/skills/<name>`` to the package's
     ``_home_defaults/workspace/skills/<name>`` so bundled skills
     stay up-to-date with the installed ductor version.
 

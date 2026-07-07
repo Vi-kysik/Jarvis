@@ -131,7 +131,7 @@ Send any message to begin."
 ```
 
 To update an existing agent's notification, edit
-`~/.ductor/agents/<name>/workspace/JOIN_NOTIFICATION.md` directly.
+`~/.jarvis/agents/<name>/workspace/JOIN_NOTIFICATION.md` directly.
 
 ## Matrix Bot Account Setup
 
